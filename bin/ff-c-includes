@@ -1,0 +1,54 @@
+#!/bin/sh -e
+##:
+#h: Usage: ff-c-includes < FILE-LIST
+#h:
+#h: Lists includes of the input files.
+#h:
+#h: -c HEADERS   : Use previous output.
+#h: -d DIRECTORY : Delete files found in directory.
+#h: -D DIRECTORY : Search includes in directory.
+. find-c-files
+ff_c_includes() (
+    cache= tmp="/tmp/c-includes" sed='/tmp/c-sed' dirs="" find=""
+    ## Parse command line arguments.
+    while getopts "c:d:D:" optopt; do
+        case $optopt in
+            c)   cache="$OPTARG" ;;
+            d)   dirs="$dirs $OPTARG";;
+            D)   find="$find $OPTARG";;
+            \?) return 1;;
+        esac
+    done
+    shift $(( $OPTIND - 1 ))
+    ## Calculate includes.
+    if test -n "$cache"; then
+        cp "$cache" "$tmp"
+    else
+        while read -r f; do
+            sed -n '
+            s|../||g
+            s|^\# *include *\<\([^>]*\)\> *.*|/\1|p
+            s|^\# *include *"\([^"]*\)" *.*|/\1|p
+            ' "$f"
+        done | sort | uniq > "$tmp"
+    fi
+    ## Delete from directories.
+    if test -n "$dirs"; then
+        find_c_files $dirs | sed 's|^.*/\(.*\)$|\\%.*/\1%Id|' > "$sed"
+        sed -i -f "$sed" "$tmp"
+    fi
+    ## Find in directory.
+    if test -n "$find"; then
+        find_c_files $find | sed 's|^\(.*\)/\(.*\)$|\\%.*/\2%s%^%\1%|' > "$sed"
+        sed -i -f "$sed" "$tmp"
+    fi
+    
+    cat "$tmp"
+)
+## -------------------------------------------------------------------
+if test @"$(basename "$0")" = @"ff-c-includes";then
+    case "${1}" in
+        -h|--help) sed -n 's/^ *#h: \{0,1\}//p' "$0" ;;
+        *)         ff_c_includes "$@"; exit 0;;
+    esac
+fi

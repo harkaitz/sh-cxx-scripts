@@ -1,0 +1,22 @@
+#!/bin/sh -e
+##:
+#h: Usage: ff-ctags < FILES
+##:
+ff_ctags() {
+    if which ctags-exuberant >/dev/null 2>&1; then
+        local ctags="ctags-exuberant"
+    elif which ctags >/dev/null 2>&1; then
+        local ctags="ctags"
+    else
+        echo >&2 "error: Please install Exuberant ctags."
+        return 1
+    fi
+    rm -f TAGS
+    "${ctags}" -e -L -
+}
+if test @"$(basename "$0")" = @"ff-ctags";then
+    case "${1}" in
+        -h|--help) sed -n 's/^ *#h: \{0,1\}//p' "$0" ;;
+        *)         ff_ctags "$@"; exit 0;;
+    esac
+fi

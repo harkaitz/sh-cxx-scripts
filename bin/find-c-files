@@ -1,0 +1,42 @@
+#!/bin/sh -e
+##:
+#h: Usage: find-c-files [DIRS...]
+#h:
+#h: Find C/C++ files (sources, binaries, ...)
+#h:
+#h:     -H : Search headers. (Default -HS)
+#h:     -S : Search source.
+#h:     -X : Search executables.
+#h:     -L : Search static libraries.
+#h:     -D : Search dynamic libraries.
+##:
+find_c_files() (
+    ## Parse command line options.
+    ops= find=
+    while getopts "HSXLD" optopt; do
+        local ops="${ops}${optopt}"
+        case $optopt in
+            \?) return 1;;
+        esac
+    done
+    shift $(( $OPTIND - 1 ))
+    ops="${ops:-HS}"
+    ## Add parameters.
+    headers='  -iname *.h   -or -iname *.hpp -or -iname *.inl'
+    sources='  -iname *.c   -or -iname *.cpp'
+    programs=' -iname *.exe -or -executable'
+    static='   -iname *.a   -or -iname *.lib'
+    dynamic='  -iname *.dll -or -iname *.so*'
+    case "${ops}" in *H*) find="${find} ${find:+-or} ${headers}"  ;; esac
+    case "${ops}" in *S*) find="${find} ${find:+-or} ${sources}"  ;; esac
+    case "${ops}" in *X*) find="${find} ${find:+-or} ${programs}" ;; esac
+    case "${ops}" in *L*) find="${find} ${find:+-or} ${static}"   ;; esac
+    case "${ops}" in *D*) find="${find} ${find:+-or} ${dynamic}"  ;; esac
+    exec find "${@:-.}" -type f -and \( $find \)
+)
+if test @"$(basename "$0")" = @"find-c-files";then
+    case "${1}" in
+        -h|--help) sed -n 's/^ *#h: \{0,1\}//p' "$0" ;;
+        *)         find_c_files "$@"; exit 0;;
+    esac
+fi
