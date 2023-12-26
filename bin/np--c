@@ -1,0 +1,16 @@
+#!/bin/sh -e
+##:
+#h: Usage: np--c : Initialize C project.
+#h:
+#h: Requires make-h(1) from sh-organizing-tools.
+##:
+np__c() {
+    make-h init c
+    make-h add c
+}
+if test @"$(basename "$0")" = @"np--c";then
+    case "${1}" in
+        -h|--help) sed -n 's/^ *#h: \{0,1\}//p' "$0";;
+        *)         np__c "$@"; exit 0;;
+    esac
+fi

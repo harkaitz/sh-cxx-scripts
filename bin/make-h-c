@@ -1,0 +1,39 @@
+#!/bin/sh -e
+##:
+#h: Usage: make-h-c ...
+#h:
+#h: ... makefile  : Print 'Makefile'.
+#h: ... gitignore : Print '.gitignore'.
+##:
+make_h_c() {
+    local cmd="$1"
+    shift
+    case "${cmd}" in
+        makefile)  make_h_c_makefile  ;;
+        gitignore) make_h_c_gitignore ;;
+        *)         echo >&2 "error: Invalid argument: ${cmd}"; return 1;;
+    esac
+}
+make_h_c_makefile() {
+    sed 's/^|//' <<-EOF
+	|clean: clean-c
+	|clean-c:
+	|	rm -f *.o
+	EOF
+}
+make_h_c_gitignore() {
+    cat <<-EOF
+	*.o
+	*.a
+	*.so
+	*.so.*
+	TAGS
+	FLYCHECK
+	EOF
+}
+if test @"$(basename "$0")" = @"make-h-c";then
+    case "${1}" in
+        ''|-h|--help) sed -n 's/^ *#h: \{0,1\}//p' "$0";;
+        *)            make_h_c "$@"; exit 0            ;;
+    esac
+fi

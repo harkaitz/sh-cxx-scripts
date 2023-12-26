@@ -30,6 +30,17 @@ find-c-files
         -L : Search static libraries.
         -D : Search dynamic libraries.
 
+make-h-c
+
+    Usage: make-h-c ...
+    
+    ... makefile  : Print 'Makefile'.
+    ... gitignore : Print '.gitignore'.
+
+np--c
+
+    Usage: np--c : Initialize C project.
+
 ## Collaborating
 
 For making bug reports, feature requests and donations visit
