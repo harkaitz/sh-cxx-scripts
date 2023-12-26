@@ -40,6 +40,8 @@ make-h-c
 np--c
 
     Usage: np--c : Initialize C project.
+    
+    Requires make-h(1) from sh-organizing-tools.
 
 ## Collaborating
 
